@@ -95,7 +95,17 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @router.get("/me", response_model=UserResponse)
 async def get_my_profile(current_user: User = Depends(get_current_user)):
     """Check Profile - Returns the current logged-in user's details."""
-    return current_user
+    try:
+        # Return as dict to ensure serialization succeeds
+        user_data = current_user.dict()
+        user_data["id"] = str(current_user.id)
+        return user_data
+    except Exception as e:
+        print(f"Me error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch profile: {str(e)}"
+        )
 
 @router.put("/profile", response_model=UserResponse)
 async def update_profile(user_update: UserUpdate, current_user: User = Depends(get_current_user)):
@@ -108,4 +118,8 @@ async def update_profile(user_update: UserUpdate, current_user: User = Depends(g
         current_user.contact_number = user_update.contact_number
     
     await current_user.save()
-    return current_user
+    
+    # Return as dict to ensure serialization succeeds
+    user_data = current_user.dict()
+    user_data["id"] = str(current_user.id)
+    return user_data

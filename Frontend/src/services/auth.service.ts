@@ -21,6 +21,7 @@ export const authService = {
     });
 
     const token = response.data.access_token;
+    localStorage.setItem('token', token);
 
     const userResp = await api.get<any>('/auth/me', {
       headers: { Authorization: `Bearer ${token}` }
