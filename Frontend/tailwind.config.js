@@ -34,9 +34,18 @@ export default {
           950: '#4a044e',
         },
         border: 'rgba(255, 255, 255, 0.1)',
+        sidebar: {
+          foreground: '#94a3b8',
+          background: '#0f172a',
+          border: '#1e293b',
+          accent: '#1e293b',
+          'accent-foreground': '#f8fafc',
+          primary: '#38bdf8',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Outfit', 'Inter', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

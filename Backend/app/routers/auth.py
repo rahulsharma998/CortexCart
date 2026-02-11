@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.models.user import User
 from app.services.auth_service import create_access_token, verify_password, get_password_hash
 from app.dependencies.auth import get_current_user
@@ -26,14 +26,15 @@ async def signup(user_in: UserCreate):
         address=user_in.address,
         contact_number=user_in.contact_number,
         dob=user_in.dob,
-        profile_photo=user_in.profile_photo
+        profile_photo=user_in.profile_photo,
+        role=user_in.role or "User"
     )
     await new_user.insert()
     return new_user
 
 @router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await User.find_one(User.username == form_data.username)
+    user = await User.find_one((User.username == form_data.username) | (User.email == form_data.username))
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -51,4 +52,17 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @router.get("/me", response_model=UserResponse)
 async def get_my_profile(current_user: User = Depends(get_current_user)):
     """Check Profile - Returns the current logged-in user's details."""
+    return current_user
+
+@router.put("/profile", response_model=UserResponse)
+async def update_profile(user_update: UserUpdate, current_user: User = Depends(get_current_user)):
+    """Update Profile - Updates the current user's details."""
+    if user_update.full_name is not None:
+        current_user.full_name = user_update.full_name
+    if user_update.address is not None:
+        current_user.address = user_update.address
+    if user_update.contact_number is not None:
+        current_user.contact_number = user_update.contact_number
+    
+    await current_user.save()
     return current_user

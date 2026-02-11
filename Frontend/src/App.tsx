@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MainLayout from "./components/layout/MainLayout";
-import ProtectedRoute from "./routes/ProtectedRoute";
+import DashboardLayout from "./components/layout/DashboardLayout";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -9,7 +8,9 @@ import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
-import AdminUsers from "./pages/AdminUsers";
+import ProtectedRoute from "./routes/ProtectedRoutes";
+
+import AdminUser from "./pages/AdminUser";
 
 function App() {
   return (
@@ -22,7 +23,7 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <MainLayout />
+              <DashboardLayout />
             </ProtectedRoute>
           }
         >
@@ -31,7 +32,7 @@ function App() {
           <Route path="cart" element={<Cart />} />
           <Route path="orders" element={<Orders />} />
           <Route path="profile" element={<Profile />} />
-          <Route path="admin/users" element={<AdminUsers />} />
+          <Route path="admin/users" element={<AdminUser />} />
         </Route>
       </Routes>
     </BrowserRouter>

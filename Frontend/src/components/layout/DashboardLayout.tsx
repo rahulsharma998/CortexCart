@@ -8,23 +8,23 @@ import {
   Users,
   LogOut,
   Menu,
-  X,
   ShoppingBag,
   ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 
 const DashboardLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, logout } = useAuthStore();
 
-  // 🔥 Temporary static values (we will connect Zustand later)
-  const role = "admin"; // change to "user" to test
-  const profile = { full_name: "John Doe" };
+  const role = user?.role || "user";
+  const profile = { full_name: user?.name || "User" };
 
-  const isAdmin = role === "admin";
+  const isAdmin = role.toLowerCase() === "admin";
 
   const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -36,7 +36,7 @@ const DashboardLayout = () => {
   ];
 
   const handleSignOut = () => {
-    localStorage.removeItem("token");
+    logout();
     navigate("/auth");
   };
 
@@ -109,7 +109,6 @@ const DashboardLayout = () => {
         </div>
       </aside>
 
-      {/* ================= Overlay (Mobile) ================= */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-foreground/20 lg:hidden"
@@ -117,7 +116,6 @@ const DashboardLayout = () => {
         />
       )}
 
-      {/* ================= Main Content ================= */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Header */}
         <header className="h-14 border-b border-border bg-card flex items-center px-4 lg:px-6 sticky top-0 z-30">
