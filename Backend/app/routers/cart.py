@@ -15,7 +15,7 @@ async def add_to_cart(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    cart = await Cart.find_one(Cart.user_id == current_user.id)
+    cart = await Cart.find_one({"user_id": current_user.id})
     if not cart:
         cart = Cart(user_id=current_user.id, items=[])
         await cart.insert()
@@ -35,14 +35,14 @@ async def add_to_cart(
 
 @router.get("/")
 async def get_cart(current_user: User = Depends(get_current_user)):
-    cart = await Cart.find_one(Cart.user_id == current_user.id)
+    cart = await Cart.find_one({"user_id": current_user.id})
     if not cart:
         return {"items": []}
     return cart
 
 @router.delete("/remove/{product_id}")
 async def remove_from_cart(product_id: str, current_user: User = Depends(get_current_user)):
-    cart = await Cart.find_one(Cart.user_id == current_user.id)
+    cart = await Cart.find_one({"user_id": current_user.id})
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
     
