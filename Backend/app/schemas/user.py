@@ -1,5 +1,5 @@
-from typing import Optional
-from pydantic import BaseModel, EmailStr, Field
+from typing import Optional, Any
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from datetime import datetime
 
 
@@ -16,14 +16,17 @@ class UserCreate(UserBase):
     email: EmailStr
     username: str
     password: str
+    role: Optional[str] = "User"
 
 class UserUpdate(UserBase):
     password: Optional[str] = None
 
 class UserResponse(UserBase):
-    id: str = Field(alias="_id")
+    id: Any = Field(alias="_id")
     username: str
     role: str
     
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True
+    )

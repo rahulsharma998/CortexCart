@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from app.db.mongodb import init_db
 from app.core.config import settings
 from app.routers import auth, products, admin, cart, order
@@ -6,6 +7,23 @@ from app.routers import auth, products, admin, cart, order
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION
+)
+
+# CORS Middleware
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:4173",
+    "https://cortexcart.onrender.com",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.middleware("http")

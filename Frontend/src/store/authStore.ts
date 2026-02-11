@@ -7,6 +7,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  users: User[]; // for admin
   isLoading: boolean;
   error: string | null;
 
@@ -15,6 +16,7 @@ interface AuthState {
   logout: () => void;
   fetchCurrentUser: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
+  fetchUsers: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -24,6 +26,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+      users: [],
       isLoading: false,
       error: null,
 
@@ -118,6 +121,19 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
           throw error;
+        }
+      },
+
+      fetchUsers: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const users = await authService.getUsers();
+          set({ users, isLoading: false });
+        } catch (error: any) {
+          set({
+            error: error.response?.data?.detail || "Failed to fetch users",
+            isLoading: false
+          });
         }
       },
 

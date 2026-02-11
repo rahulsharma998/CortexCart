@@ -31,7 +31,7 @@ export interface Order {
   _id: string;
   user: string;
   items: {
-    product: string;
+    product: Product;
     quantity: number;
     price: number;
   }[];
@@ -52,10 +52,25 @@ export interface RegisterData {
   password: string;
   name: string;
   phone?: string;
+  address?: string;
+  dob?: string;
+  role?: 'User' | 'Admin';
+
 }
 
 export interface AuthResponse {
   access_token: string;
   token_type: string;
   user: User;
+}
+
+
+export interface CreateOrderData {
+  items: {
+    product: string;
+    quantity: number;
+    price: number;
+  }[];
+  totalAmount: number;
+  shippingAddress: string;
 }

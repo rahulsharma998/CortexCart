@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { api } from "@/services/api";
-import type { Order } from "@/types";
+import type { Order, CreateOrderData } from "@/types";
 
 interface OrderState {
   orders: Order[];
@@ -8,7 +8,7 @@ interface OrderState {
   error: string | null;
 
   fetchOrders: () => Promise<void>;
-  createOrder: (data: Partial<Order>) => Promise<void>;
+  createOrder: (data: CreateOrderData) => Promise<void>;
   clearError: () => void;
 }
 

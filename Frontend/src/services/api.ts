@@ -1,6 +1,14 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1/';
+const API_URL = import.meta.env.VITE_API_URL || 'https://cortexcart.onrender.com/api/v1/';
+
+// Runtime check: helps diagnose wrong/relative requests in dev
+try {
+  // eslint-disable-next-line no-console
+  console.debug('Resolved API_URL:', API_URL);
+} catch (e) {
+  // ignore in environments where console is not available
+}
 
 export const api = axios.create({
   baseURL: API_URL,

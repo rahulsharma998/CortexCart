@@ -31,11 +31,17 @@ async def get_product(product_id: str):
     return product
 
 @router.put("/{product_id}", response_model=ProductResponse)
-async def update_product(product_id: str, product_in: ProductUpdate):
+async def update_product(
+    product_id: str, 
+    product_in: ProductUpdate, 
+    current_user: User = Depends(get_current_user)
+):
     product = await Product.get(product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    if str(product.created_by) != str(current_user.id):
+    
+    # Check if user is admin or creator
+    if current_user.role != "admin" and str(product.created_by) != str(current_user.id):
         raise HTTPException(status_code=403, detail="Not authorized")
     
     update_data = product_in.model_dump(exclude_unset=True)
@@ -43,11 +49,17 @@ async def update_product(product_id: str, product_in: ProductUpdate):
     return product
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_product(product_id: str):
+async def delete_product(
+    product_id: str, 
+    current_user: User = Depends(get_current_user)
+):
     product = await Product.get(product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    if str(product.created_by) != str(current_user.id):
+        
+    # Check if user is admin or creator
+    if current_user.role != "admin" and str(product.created_by) != str(current_user.id):
         raise HTTPException(status_code=403, detail="Not authorized")
+        
     await product.delete()
     return None

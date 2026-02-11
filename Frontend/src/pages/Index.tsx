@@ -1,16 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
-import { motion } from "framer-motion";
 
 const Index = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+      <div
         className="text-center max-w-2xl"
       >
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-6">
@@ -32,7 +28,7 @@ const Index = () => {
         >
           Get Started
         </button>
-      </motion.div>
+      </div>
     </div>
   );
 };
