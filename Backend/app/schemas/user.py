@@ -1,5 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
+from datetime import datetime
+
 
 class UserBase(BaseModel):
     email: Optional[EmailStr] = None
