@@ -10,36 +10,53 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/signup", response_model=UserResponse)
 async def signup(user_in: UserCreate):
-    user_exists = await User.find_one((User.email == user_in.email) | (User.username == user_in.username))
-    if user_exists:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email or username already exists"
-        )
-    
-    hashed_password = get_password_hash(user_in.password)
-    
-    # Normalize role to match Literal["Admin", "User"] exactly
-    valid_role = "User"
-    if user_in.role:
-        if user_in.role.lower() == "admin":
-            valid_role = "Admin"
-        elif user_in.role.lower() == "user":
-            valid_role = "User"
+    try:
+        # Check if user already exists
+        user_exists = await User.find_one((User.email == user_in.email) | (User.username == user_in.username))
+        if user_exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with this email or username already exists"
+            )
+        
+        hashed_password = get_password_hash(user_in.password)
+        
+        # Normalize role to match Literal["Admin", "User"] exactly
+        valid_role = "User"
+        if user_in.role:
+            if user_in.role.lower() == "admin":
+                valid_role = "Admin"
+            elif user_in.role.lower() == "user":
+                valid_role = "User"
 
-    new_user = User(
-        username=user_in.username,
-        email=user_in.email,
-        hashed_password=hashed_password,
-        full_name=user_in.full_name,
-        address=user_in.address,
-        contact_number=user_in.contact_number,
-        dob=user_in.dob,
-        profile_photo=user_in.profile_photo,
-        role=valid_role
-    )
-    await new_user.insert()
-    return new_user
+        new_user = User(
+            username=user_in.username,
+            email=user_in.email,
+            hashed_password=hashed_password,
+            full_name=user_in.full_name,
+            address=user_in.address,
+            contact_number=user_in.contact_number,
+            dob=user_in.dob,
+            profile_photo=user_in.profile_photo,
+            role=valid_role
+        )
+        
+        await new_user.insert()
+        
+        # Return as dict to ensure serialization succeeds
+        user_data = new_user.dict()
+        user_data["id"] = str(new_user.id)
+        return user_data
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        # Catch-all for debugging the 500 error
+        print(f"Signup error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Registration failed: {str(e)}"
+        )
 
 @router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
