@@ -1,5 +1,5 @@
 from typing import Optional, Any
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, AliasChoices
 from datetime import datetime
 from beanie import PydanticObjectId
 
@@ -12,6 +12,8 @@ class UserBase(BaseModel):
     contact_number: Optional[str] = None
     dob: Optional[datetime] = None
     profile_photo: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 class UserCreate(UserBase):
     email: EmailStr
@@ -23,7 +25,7 @@ class UserUpdate(UserBase):
     password: Optional[str] = None
 
 class UserResponse(UserBase):
-    id: Optional[Any] = None
+    id: Optional[str] = Field(None, validation_alias=AliasChoices("id", "_id"))
     username: str
     role: str
     
