@@ -11,17 +11,22 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/signup", response_model=UserResponse)
 async def signup(user_in: UserCreate):
     try:
-        # Check if user already exists - using standard MongoDB $or query for safety
-        user_exists = await User.find_one({
-            "$or": [
-                {"email": user_in.email},
-                {"username": user_in.username}
-            ]
-        })
-        if user_exists:
+        print(f"DEBUG: Starting signup for {user_in.email}")
+        
+        # Check if email exists
+        user_by_email = await User.find_one({"email": user_in.email})
+        if user_by_email:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User with this email or username already exists"
+                detail="User with this email already exists"
+            )
+            
+        # Check if username exists
+        user_by_username = await User.find_one({"username": user_in.username})
+        if user_by_username:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with this username already exists"
             )
         
         hashed_password = get_password_hash(user_in.password)
@@ -65,12 +70,14 @@ async def signup(user_in: UserCreate):
 
 @router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await User.find_one({
-        "$or": [
-            {"username": form_data.username},
-            {"email": form_data.username}
-        ]
-    })
+    print(f"DEBUG: Login attempt for {form_data.username}")
+    # Try finding by username
+    user = await User.find_one({"username": form_data.username})
+    
+    # If not found, try finding by email
+    if not user:
+        user = await User.find_one({"email": form_data.username})
+    
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

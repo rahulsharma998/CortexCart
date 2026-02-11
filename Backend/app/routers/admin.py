@@ -28,7 +28,7 @@ async def toggle_user_status(user_id: str, admin: User = Depends(get_current_adm
 async def get_admin_stats(admin: User = Depends(get_current_admin)):
     """Get overview stats for the admin dashboard."""
     total_users = await User.count()
-    active_users = await User.find(User.is_active == True).count()
+    active_users = await User.find({"is_active": True}).count()
     total_products = await Product.count()
     total_orders = await Order.count()
     

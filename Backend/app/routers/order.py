@@ -10,7 +10,7 @@ router = APIRouter(prefix="/orders", tags=["orders"])
 
 @router.post("/checkout", status_code=status.HTTP_201_CREATED)
 async def checkout(current_user: User = Depends(get_current_user)):
-    cart = await Cart.find_one(Cart.user_id == current_user.id)
+    cart = await Cart.find_one({"user_id": current_user.id})
     if not cart or not cart.items:
         raise HTTPException(status_code=400, detail="Cart is empty")
     
@@ -61,7 +61,7 @@ async def checkout(current_user: User = Depends(get_current_user)):
 @router.get("/my-orders", response_model=List[Order])
 async def get_my_orders(current_user: User = Depends(get_current_user)):
     """Get all orders placed by the current user."""
-    return await Order.find(Order.user_id == current_user.id).to_list()
+    return await Order.find({"user_id": current_user.id}).to_list()
 
 @router.get("/all", response_model=List[Order])
 async def get_all_orders(admin: User = Depends(get_current_admin)):
