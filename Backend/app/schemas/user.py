@@ -5,18 +5,16 @@ from beanie import PydanticObjectId
 
 
 class UserBase(BaseModel):
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     is_active: Optional[bool] = True
     full_name: Optional[str] = None
     address: Optional[str] = None
     contact_number: Optional[str] = None
     dob: Optional[datetime] = None
     profile_photo: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
 class UserCreate(UserBase):
-    email: EmailStr
+    email: str
     username: str
     password: str
     role: Optional[str] = "User"
@@ -25,7 +23,7 @@ class UserUpdate(UserBase):
     password: Optional[str] = None
 
 class UserResponse(UserBase):
-    id: Optional[str] = Field(None, validation_alias=AliasChoices("id", "_id"))
+    id: Optional[str] = None
     username: str
     role: str
     
