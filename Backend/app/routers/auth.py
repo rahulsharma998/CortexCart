@@ -11,8 +11,13 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/signup", response_model=UserResponse)
 async def signup(user_in: UserCreate):
     try:
-        # Check if user already exists
-        user_exists = await User.find_one((User.email == user_in.email) | (User.username == user_in.username))
+        # Check if user already exists - using standard MongoDB $or query for safety
+        user_exists = await User.find_one({
+            "$or": [
+                {"email": user_in.email},
+                {"username": user_in.username}
+            ]
+        })
         if user_exists:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -60,7 +65,12 @@ async def signup(user_in: UserCreate):
 
 @router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await User.find_one((User.username == form_data.username) | (User.email == form_data.username))
+    user = await User.find_one({
+        "$or": [
+            {"username": form_data.username},
+            {"email": form_data.username}
+        ]
+    })
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
