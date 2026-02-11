@@ -1,0 +1,135 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { User, LoginCredentials, RegisterData } from "../types";
+import { authService } from "../services/auth.service";
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+
+  login: (credentials: LoginCredentials) => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
+  logout: () => void;
+  fetchCurrentUser: () => Promise<void>;
+  updateProfile: (data: Partial<User>) => Promise<void>;
+  clearError: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: null,
+
+      login: async (credentials) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await authService.login(credentials);
+
+          set({
+            user: response.user,
+            token: response.access_token,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error: any) {
+          set({
+            error:
+              error.response?.data?.detail || "Login failed",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      register: async (data) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await authService.register(data);
+
+          set({
+            user: response.user,
+            token: response.access_token,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error: any) {
+          set({
+            error:
+              error.response?.data?.detail || "Registration failed",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      logout: () => {
+        authService.logout();
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          error: null,
+        });
+      },
+
+      fetchCurrentUser: async () => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const user = await authService.getCurrentUser();
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error: any) {
+          set({
+            error:
+              error.response?.data?.detail ||
+              "Failed to fetch user",
+            isLoading: false,
+          });
+        }
+      },
+
+      updateProfile: async (data) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const user = await authService.updateProfile(data);
+          set({
+            user,
+            isLoading: false,
+          });
+        } catch (error: any) {
+          set({
+            error:
+              error.response?.data?.detail ||
+              "Failed to update profile",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      clearError: () => set({ error: null }),
+    }),
+    {
+      name: "auth-storage",
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    }
+  )
+);
