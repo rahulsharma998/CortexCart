@@ -23,11 +23,11 @@ class UserUpdate(UserBase):
     password: Optional[str] = None
 
 class UserResponse(UserBase):
-    id: PydanticObjectId = Field(alias="_id")
+    id: Optional[Any] = None
     username: str
     role: str
     
     model_config = ConfigDict(
-        populate_by_name=True,
-        from_attributes=True
+        from_attributes=True,
+        populate_by_name=True
     )

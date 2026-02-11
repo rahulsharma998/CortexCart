@@ -81,8 +81,16 @@ const Auth = () => {
 
           <CardContent className="p-6">
             {error && (
-              <div className="mb-4 p-3 rounded-md bg-red-50 text-red-600 text-sm font-medium border border-red-100 flex items-center">
-                <span className="mr-2">⚠️</span> {error}
+              <div className="mb-4 p-3 rounded-md bg-red-50 text-red-600 text-sm font-medium border border-red-100">
+                <div className="flex items-center mb-1">
+                  <span className="mr-2">⚠️</span>
+                  <span>Error Found:</span>
+                </div>
+                <div className="pl-6 break-words whitespace-pre-wrap">
+                  {error.startsWith("[") || error.startsWith("{")
+                    ? JSON.stringify(JSON.parse(error), null, 2)
+                    : error}
+                </div>
               </div>
             )}
 

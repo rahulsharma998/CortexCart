@@ -65,9 +65,9 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
         } catch (error: any) {
+          const detail = error.response?.data?.detail;
           set({
-            error:
-              error.response?.data?.detail || "Registration failed",
+            error: typeof detail === "string" ? detail : (detail ? JSON.stringify(detail) : "Registration failed"),
             isLoading: false,
           });
           throw error;
