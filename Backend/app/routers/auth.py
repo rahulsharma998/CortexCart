@@ -18,6 +18,15 @@ async def signup(user_in: UserCreate):
         )
     
     hashed_password = get_password_hash(user_in.password)
+    
+    # Normalize role to match Literal["Admin", "User"] exactly
+    valid_role = "User"
+    if user_in.role:
+        if user_in.role.lower() == "admin":
+            valid_role = "Admin"
+        elif user_in.role.lower() == "user":
+            valid_role = "User"
+
     new_user = User(
         username=user_in.username,
         email=user_in.email,
@@ -27,7 +36,7 @@ async def signup(user_in: UserCreate):
         contact_number=user_in.contact_number,
         dob=user_in.dob,
         profile_photo=user_in.profile_photo,
-        role=user_in.role or "User"
+        role=valid_role
     )
     await new_user.insert()
     return new_user

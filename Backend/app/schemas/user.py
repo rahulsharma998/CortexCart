@@ -28,5 +28,6 @@ class UserResponse(UserBase):
     role: str
     
     model_config = ConfigDict(
-        populate_by_name=True
+        populate_by_name=True,
+        from_attributes=True
     )
