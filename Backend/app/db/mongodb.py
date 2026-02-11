@@ -6,9 +6,15 @@ from app.models.product import Product
 from app.models.cart import Cart
 from app.models.order import Order
 
+_initialized = False
+
 async def init_db():
+    global _initialized
+    if _initialized:
+        return
+
     client = AsyncIOMotorClient(settings.MONGO_URI)
-    
+
     await init_beanie(
         database=client[settings.DB_NAME],
         document_models=[
@@ -18,3 +24,4 @@ async def init_db():
             Order
         ]
     )
+    _initialized = True

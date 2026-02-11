@@ -1,21 +1,18 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from app.db.mongodb import init_db
 from app.core.config import settings
 from app.routers import auth, products, admin, cart, order
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await init_db()
-    print("Database connected successfully!")
-    yield
-    print("Shutting down...")
-
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    lifespan=lifespan
+    version=settings.VERSION
 )
+
+@app.middleware("http")
+async def db_session_middleware(request: Request, call_next):
+    await init_db()
+    response = await call_next(request)
+    return response
 
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(products.router, prefix=settings.API_V1_STR)
