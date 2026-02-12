@@ -9,6 +9,7 @@ interface UserData {
   _id?: string;
   role?: string;
   isActive?: boolean;
+  is_active?: boolean;
   [key: string]: string | boolean | undefined;
 }
 
@@ -18,7 +19,7 @@ const mapUser = (data: UserData): User => ({
   email: data.email || '',
   _id: data.id || data._id || '',
   role: (data.role || 'User') as 'User' | 'Admin',
-  isActive: data.isActive ?? true,
+  isActive: data.isActive ?? data.is_active ?? true,
 });
 
 export const authService = {
@@ -91,5 +92,10 @@ export const authService = {
   async getUsers(): Promise<User[]> {
     const response = await api.get<UserData[]>('/admin/users');
     return response.data.map(mapUser);
+  },
+
+  async toggleUserStatus(userId: string): Promise<{ user_id: string; is_active: boolean }> {
+    const response = await api.patch<{ user_id: string; is_active: boolean }>(`/admin/users/${userId}/toggle-status`);
+    return response.data;
   },
 };

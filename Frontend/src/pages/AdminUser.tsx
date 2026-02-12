@@ -1,18 +1,31 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MoreHorizontal } from "lucide-react";
+import { Loader2, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 const AdminUser = () => {
-  const { users, fetchUsers, isLoading, error } = useAuthStore();
+  const { users, fetchUsers, toggleUserStatus, isLoading, error } = useAuthStore();
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  if (isLoading) {
+  const handleToggleStatus = async (userId: string) => {
+    setTogglingId(userId);
+    try {
+      await toggleUserStatus(userId);
+    } catch (err) {
+      console.error("Failed to toggle user status:", err);
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  if (isLoading && users.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
@@ -20,7 +33,7 @@ const AdminUser = () => {
     );
   }
 
-  if (error) {
+  if (error && users.length === 0) {
     return (
       <div className="text-center py-16 text-red-500">
         <p>{error}</p>
@@ -44,7 +57,7 @@ const AdminUser = () => {
         <CardHeader>
           <CardTitle>Users</CardTitle>
           <CardDescription>
-            A list of all users including their name, email, and role.
+            A list of all users including their name, email, role, and status.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -55,19 +68,20 @@ const AdminUser = () => {
                   <TableHead className="w-[100px]">Avatar</TableHead>
                   <TableHead>User Information</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center text-slate-500">
+                    <TableCell colSpan={5} className="h-24 text-center text-slate-500">
                       No users found.
                     </TableCell>
                   </TableRow>
                 ) : (
                   users.map((user) => (
-                    <TableRow key={user._id}>
+                    <TableRow key={user._id} className={!user.isActive ? "opacity-60" : ""}>
                       <TableCell>
                         <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300">
                           {user.name?.charAt(0).toUpperCase()}
@@ -82,10 +96,36 @@ const AdminUser = () => {
                           {user.role}
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            user.isActive
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400"
+                          }
+                        >
+                          {user.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-right">
-                        {/* Placeholder for actions */}
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="w-4 h-4" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={togglingId === user._id}
+                          onClick={() => handleToggleStatus(user._id)}
+                          className={
+                            user.isActive
+                              ? "text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                              : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"
+                          }
+                        >
+                          {togglingId === user._id ? (
+                            <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                          ) : (
+                            <Power className="w-4 h-4 mr-1.5" />
+                          )}
+                          {user.isActive ? "Deactivate" : "Activate"}
                         </Button>
                       </TableCell>
                     </TableRow>

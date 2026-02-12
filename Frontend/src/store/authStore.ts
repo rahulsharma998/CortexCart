@@ -18,6 +18,7 @@ interface AuthState {
   fetchCurrentUser: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   fetchUsers: () => Promise<void>;
+  toggleUserStatus: (userId: string) => Promise<void>;
   clearError: () => void;
   setHasHydrated: (value: boolean) => void;
 }
@@ -152,6 +153,22 @@ export const useAuthStore = create<AuthState>()(
             error: error.response?.data?.detail || "Failed to fetch users",
             isLoading: false
           });
+        }
+      },
+
+      toggleUserStatus: async (userId: string) => {
+        try {
+          const result = await authService.toggleUserStatus(userId);
+          set((state) => ({
+            users: state.users.map((u) =>
+              u._id === userId ? { ...u, isActive: result.is_active } : u
+            ),
+          }));
+        } catch (error: any) {
+          set({
+            error: error.response?.data?.detail || "Failed to toggle user status",
+          });
+          throw error;
         }
       },
 
