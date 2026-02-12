@@ -78,7 +78,7 @@ const AdminUser = () => {
                         <div className="text-sm text-slate-500 dark:text-slate-400">{user.email}</div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="uppercase">
+                        <Badge variant={user.role === 'Admin' ? 'default' : 'secondary'} className="uppercase">
                           {user.role}
                         </Badge>
                       </TableCell>
