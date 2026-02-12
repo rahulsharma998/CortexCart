@@ -36,6 +36,8 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authService.login(credentials);
 
+          localStorage.setItem("token", response.access_token);
+
           set({
             user: response.user,
             token: response.access_token,
@@ -58,6 +60,8 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authService.register(data);
 
+          localStorage.setItem("token", response.access_token);
+
           set({
             user: response.user,
             token: response.access_token,
@@ -76,6 +80,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         authService.logout();
+        localStorage.removeItem("token");
         set({
           user: null,
           token: null,
@@ -96,6 +101,7 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (error: any) {
           if (error.response?.status === 401) {
+            localStorage.removeItem("token");
             set({
               user: null,
               token: null,

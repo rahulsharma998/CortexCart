@@ -22,9 +22,11 @@ export const useOrderStore = create<OrderState>((set) => ({
 
     try {
       const response = await api.get("/orders/my-orders");
-      set({ orders: response.data, isLoading: false });
+      const orders = Array.isArray(response.data) ? response.data : [];
+      set({ orders, isLoading: false });
     } catch (error: any) {
       set({
+        orders: [],
         error: error.response?.data?.detail || "Failed to fetch orders",
         isLoading: false,
       });

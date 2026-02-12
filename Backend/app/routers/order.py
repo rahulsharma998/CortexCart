@@ -18,18 +18,32 @@ class CheckoutRequest(BaseModel):
 async def checkout(request: CheckoutRequest, current_user: User = Depends(get_current_user)):
     order_items = []
     for item in request.items:
-        product = await Product.get(item["product"])
+        product_id = item.get("product")
+        if not product_id:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing product id")
+
+        product = await Product.get(product_id)
         if not product:
-            continue
-        
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Product not found")
+
+        quantity = item.get("quantity")
+        price = item.get("price")
+        if not isinstance(quantity, int) or quantity <= 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid quantity")
+        if price is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing price")
+
+        if product.stock is not None and product.stock < quantity:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient stock")
+
         order_items.append(OrderItem(
             product_id=product.id,
             name=product.name,
-            quantity=item["quantity"],
-            price=item["price"]
+            quantity=quantity,
+            price=price,
         ))
-        
-        product.stock -= item["quantity"]
+
+        product.stock -= quantity
         await product.save()
 
     order = Order(
@@ -48,6 +62,10 @@ async def checkout(request: CheckoutRequest, current_user: User = Depends(get_cu
 
     order_data = order.model_dump()
     order_data["id"] = str(order.id)
+    order_data["user_id"] = str(order.user_id)
+    for i in order_data.get("items", []):
+        if "product_id" in i:
+            i["product_id"] = str(i["product_id"])
     return {
         "message": "Order placed successfully", 
         "order": order_data

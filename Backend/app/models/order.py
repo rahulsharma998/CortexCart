@@ -16,8 +16,10 @@ class Order(Document):
     user_id: PydanticObjectId
     items: List[OrderItem]
     total_amount: float
+    shipping_address: str = "Default"
     status: str = "Placed"
     created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
 
     class Settings:
         name = "orders"
