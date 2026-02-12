@@ -6,7 +6,7 @@ CortexCart is a full-stack, production-ready e-commerce web application built us
 
 ## 🚀 Live Demo
 
-* **Frontend:** [https://cortex-cart-eda7.vercel.app/](https://cortex-cart-eda7.vercel.app/)
+* **Frontend:** [https://snazzy-brigadeiros-6caacf.netlify.app/](https://snazzy-brigadeiros-6caacf.netlify.app/)
 * **Backend API:** [https://cortexcart.onrender.com/](https://cortexcart.onrender.com/)
 * **API Base URL:** [https://cortexcart.onrender.com/api/v1](https://cortexcart.onrender.com/api/v1)
 
