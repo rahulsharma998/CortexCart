@@ -1,57 +1,38 @@
-from fastapi import APIRouter, Depends, HTTPException
-from app.dependencies.auth import get_current_admin
-from app.models.user import User
-from app.models.product import Product
-from app.models.order import Order
-from app.schemas.user import UserResponse
-from typing import List
+import pymongo
+import datetime
+from passlib.context import CryptContext
 
-router = APIRouter(prefix="/admin", tags=["admin"])
+# Configuration
+MONGO_URI = "mongodb+srv://rahulsharma243998_db_user:o6FyReLbv1KaFe0q@cluster0.544eqn5.mongodb.net/?appName=Cluster0"
+DB_NAME = "cortexcart"
 
-@router.get("/users", response_model=List[UserResponse])
-async def get_all_users(admin: User = Depends(get_current_admin)):
-    """Admin endpoint to list all users."""
-    return await User.find_all().to_list()
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
-@router.patch("/users/{user_id}/toggle-status")
-async def toggle_user_status(user_id: str, admin: User = Depends(get_current_admin)):
-    """Admin endpoint to activate/deactivate a user."""
-    user = await User.get(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+def seed():
+    client = pymongo.MongoClient(MONGO_URI)
+    db = client[DB_NAME]
     
-    user.is_active = not user.is_active
-    await user.save()
-    return {"user_id": str(user.id), "is_active": user.is_active}
-
-@router.get("/stats")
-async def get_admin_stats(admin: User = Depends(get_current_admin)):
-    """Get overview stats for the admin dashboard."""
-    total_users = await User.count()
-    active_users = await User.find({"is_active": True}).count()
-    total_products = await Product.count()
-    total_orders = await Order.count()
-    
-    return {
-        "total_users": total_users,
-        "active_users": active_users,
-        "total_products": total_products,
-        "total_orders": total_orders
-    }
-@router.post("/seed-products")
-async def seed_products():
-    """Seed the database with dummy products (Public for easy setup)."""
-    # Try to find any admin to be the 'creator'
-    admin = await User.find_one({"role": "Admin"})
+    # 1. Ensure Admin
+    admin_email = "admin@cortexcart.com"
+    admin = db.users.find_one({"email": admin_email})
     if not admin:
-        # Create a default admin if none exists
-        admin = User(
-            username="admin",
-            email="admin@cortexcart.com",
-            hashed_password=get_password_hash("admin123"),
-            role="Admin"
-        )
-        await admin.insert()
+        admin_id = db.users.insert_one({
+            "username": "admin",
+            "email": admin_email,
+            "hashed_password": get_password_hash("admin123"),
+            "full_name": "System Admin",
+            "role": "Admin",
+            "is_active": True
+        }).inserted_id
+        print("Admin user created")
+    else:
+        admin_id = admin["_id"]
+        print("Admin user already exists")
+
+    # 2. Add Dummy Products
     dummy_products = [
       {"name": "Fjallraven - Foldsack No. 1 Backpack", "price": 109.95, "description": "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve.", "category": "men's clothing", "images": ["https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_t.png"], "stock": 50},
       {"name": "Mens Casual Premium Slim Fit T-Shirts", "price": 22.3, "description": "Slim-fitting style, contrast raglan long sleeve, three-button henley placket, light weight & soft fabric.", "category": "men's clothing", "images": ["https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_t.png"], "stock": 100},
@@ -75,12 +56,19 @@ async def seed_products():
       {"name": "DANVOUY Womens T Shirt", "price": 12.99, "description": "Casual Short Sleeve Fashion Tee. The fabric is soft and has some stretch.", "category": "women's clothing", "images": ["https://fakestoreapi.com/img/61pHAEJ4NML._AC_UX679_t.png"], "stock": 95}
     ]
 
-    added_count = 0
-    for p_data in dummy_products:
-        existing = await Product.find_one({"name": p_data["name"]})
-        if not existing:
-            product = Product(**p_data, created_by=admin.id)
-            await product.insert()
-            added_count += 1
+    added = 0
+    for p in dummy_products:
+        if not db.products.find_one({"name": p["name"]}):
+            db.products.insert_one({
+                **p,
+                "created_by": admin_id,
+                "created_at": datetime.datetime.utcnow(),
+                "updated_at": datetime.datetime.utcnow()
+            })
+            added += 1
+            print(f"Added: {p['name']}")
     
-    return {"message": f"Successfully seeded {added_count} products", "total": len(dummy_products)}
+    print(f"Done! Seeded {added} products.")
+
+if __name__ == "__main__":
+    seed()

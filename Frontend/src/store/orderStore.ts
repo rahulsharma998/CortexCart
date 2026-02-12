@@ -21,7 +21,7 @@ export const useOrderStore = create<OrderState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await api.get("/orders");
+      const response = await api.get("/orders/my-orders");
       set({ orders: response.data, isLoading: false });
     } catch (error: any) {
       set({
@@ -35,7 +35,7 @@ export const useOrderStore = create<OrderState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await api.post("/orders", data);
+      await api.post("/orders/checkout", data);
       set({ isLoading: false });
     } catch (error: any) {
       set({

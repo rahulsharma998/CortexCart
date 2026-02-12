@@ -47,7 +47,7 @@ const Products = () => {
             />
           </div>
           {isAdmin && (
-            <Button className="bg-primary-600 hover:bg-primary-700 text-white">
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white shadow-md">
               <Plus className="w-4 h-4 mr-2" /> Add Product
             </Button>
           )}
@@ -56,7 +56,7 @@ const Products = () => {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
+          <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
         </div>
       ) : error ? (
         <div className="text-center py-16 text-red-500">
@@ -115,13 +115,13 @@ const Products = () => {
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                     <div className="flex flex-col">
                       <span className="text-sm text-slate-400 font-medium">Price</span>
-                      <span className="text-xl font-bold text-primary-600 dark:text-primary-400">
+                      <span className="text-xl font-bold text-orange-600 dark:text-orange-400">
                         ₹{product.price}
                       </span>
                     </div>
                     <Button
                       size="sm"
-                      className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-primary-600 hover:text-white dark:hover:bg-primary-400 transition-colors"
+                      className="bg-orange-500 dark:bg-orange-600 text-white hover:bg-orange-600 dark:hover:bg-orange-700 transition-all shadow-sm"
                       onClick={() => addItem(product)}
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" /> Add
