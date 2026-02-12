@@ -8,7 +8,11 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, token } = useAuthStore();
+  const { isAuthenticated, token, hasHydrated } = useAuthStore();
+
+  if (!hasHydrated) {
+    return null;
+  }
 
   if (!isAuthenticated || !token) {
     return <Navigate to="/auth" replace />;

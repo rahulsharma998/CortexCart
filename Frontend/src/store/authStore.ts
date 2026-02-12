@@ -7,6 +7,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  hasHydrated: boolean;
   users: User[]; // for admin
   isLoading: boolean;
   error: string | null;
@@ -18,6 +19,7 @@ interface AuthState {
   updateProfile: (data: Partial<User>) => Promise<void>;
   fetchUsers: () => Promise<void>;
   clearError: () => void;
+  setHasHydrated: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -26,6 +28,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+      hasHydrated: false,
       users: [],
       isLoading: false,
       error: null,
@@ -153,6 +156,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       clearError: () => set({ error: null }),
+      setHasHydrated: (value) => set({ hasHydrated: value }),
     }),
     {
       name: "auth-storage",
@@ -161,6 +165,9 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

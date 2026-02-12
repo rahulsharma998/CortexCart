@@ -35,6 +35,11 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
+      try {
+        localStorage.removeItem('auth-storage');
+      } catch (e) {
+        // ignore storage access errors
+      }
       if (!window.location.pathname.startsWith('/auth')) {
         window.location.href = '/auth';
       }

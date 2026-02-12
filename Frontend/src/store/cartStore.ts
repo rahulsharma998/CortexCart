@@ -77,6 +77,18 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "cart-storage",
+      onRehydrateStorage: () => (state) => {
+        try {
+          const items = state?.items || [];
+          const isValidObjectId = (id: string) => /^[a-f\d]{24}$/i.test(id);
+          const filtered = items.filter((i: any) => isValidObjectId(i?.product?._id));
+          if (filtered.length !== items.length) {
+            state?.clearCart();
+          }
+        } catch (e) {
+          // ignore rehydrate errors
+        }
+      },
     }
   )
 );

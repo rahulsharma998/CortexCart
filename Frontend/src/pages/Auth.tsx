@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(false);
   const navigate = useNavigate();
-  const { login, register, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const { login, register, isLoading, error, clearError, isAuthenticated, token, hasHydrated } = useAuthStore();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,11 +19,11 @@ const Auth = () => {
   const [role, setRole] = useState<"User" | "Admin">("User");
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (hasHydrated && isAuthenticated && token) {
       navigate("/dashboard");
     }
     return () => clearError();
-  }, [isAuthenticated, navigate, clearError]);
+  }, [hasHydrated, isAuthenticated, token, navigate, clearError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

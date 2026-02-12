@@ -29,9 +29,12 @@ export interface CartItem {
 
 export interface Order {
   _id: string;
-  user: string;
+  user?: string;
+  user_id?: string;
   items: {
-    product: Product;
+    product?: Product;
+    product_id?: string;
+    name?: string;
     quantity: number;
     price: number;
   }[];
@@ -39,7 +42,7 @@ export interface Order {
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   shippingAddress: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface LoginCredentials {
