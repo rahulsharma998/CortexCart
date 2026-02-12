@@ -65,7 +65,7 @@ async def checkout(request: CheckoutRequest, current_user: User = Depends(get_cu
         await db_cart.save()
 
     # Return as safe dict
-    order_data = order.model_dump()
+    order_data = order.model_dump(mode='json')
     order_data["id"] = str(order.id)
     return {
         "message": "Order placed successfully", 
@@ -80,7 +80,7 @@ async def get_my_orders(current_user: User = Depends(get_current_user)):
     # Return as safe dict list
     safe_orders = []
     for o in orders:
-        d = o.model_dump()
+        d = o.model_dump(mode='json')
         d["id"] = str(o.id)
         d["user_id"] = str(o.user_id)
         for item in d["items"]:
@@ -88,7 +88,7 @@ async def get_my_orders(current_user: User = Depends(get_current_user)):
         safe_orders.append(d)
     return safe_orders
 
-@router.get("/all", response_model=List[Order])
+@router.get("/all")
 async def get_all_orders(admin: User = Depends(get_current_admin)):
     """Admin endpoint to see all orders across the system."""
     return await Order.find_all().to_list()

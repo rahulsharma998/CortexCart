@@ -95,12 +95,21 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
         } catch (error: any) {
-          set({
-            error:
-              error.response?.data?.detail ||
-              "Failed to fetch user",
-            isLoading: false,
-          });
+          if (error.response?.status === 401) {
+            set({
+              user: null,
+              token: null,
+              isAuthenticated: false,
+              isLoading: false,
+            });
+          } else {
+            set({
+              error:
+                error.response?.data?.detail ||
+                "Failed to fetch user",
+              isLoading: false,
+            });
+          }
         }
       },
 
