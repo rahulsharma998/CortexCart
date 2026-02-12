@@ -11,7 +11,6 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.get("/users")
 async def get_all_users(admin: User = Depends(get_current_admin)):
-    """Admin endpoint to list all users."""
     users = await User.find_all().to_list()
     safe_users = []
     for u in users:
@@ -22,7 +21,6 @@ async def get_all_users(admin: User = Depends(get_current_admin)):
 
 @router.patch("/users/{user_id}/toggle-status")
 async def toggle_user_status(user_id: str, admin: User = Depends(get_current_admin)):
-    """Admin endpoint to activate/deactivate a user."""
     user = await User.get(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -33,7 +31,6 @@ async def toggle_user_status(user_id: str, admin: User = Depends(get_current_adm
 
 @router.get("/stats")
 async def get_admin_stats(admin: User = Depends(get_current_admin)):
-    """Get overview stats for the admin dashboard."""
     total_users = await User.count()
     active_users = await User.find({"is_active": True}).count()
     total_products = await Product.count()
@@ -45,13 +42,11 @@ async def get_admin_stats(admin: User = Depends(get_current_admin)):
         "total_products": total_products,
         "total_orders": total_orders
     }
+
 @router.post("/seed-products")
 async def seed_products():
-    """Seed the database with dummy products (Public for easy setup)."""
-    # Try to find any admin to be the 'creator'
     admin = await User.find_one({"role": "Admin"})
     if not admin:
-        # Create a default admin if none exists
         admin = User(
             username="admin",
             email="admin@cortexcart.com",
@@ -59,6 +54,7 @@ async def seed_products():
             role="Admin"
         )
         await admin.insert()
+
     dummy_products = [
       {"name": "Fjallraven - Foldsack No. 1 Backpack", "price": 109.95, "description": "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve.", "category": "men's clothing", "images": ["https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_t.png"], "stock": 50},
       {"name": "Mens Casual Premium Slim Fit T-Shirts", "price": 22.3, "description": "Slim-fitting style, contrast raglan long sleeve, three-button henley placket, light weight & soft fabric.", "category": "men's clothing", "images": ["https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_t.png"], "stock": 100},
