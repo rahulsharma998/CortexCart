@@ -54,7 +54,7 @@ async def signup(user_in: UserCreate):
         await new_user.insert()
         
         # Return as dict to ensure serialization succeeds
-        user_data = new_user.dict()
+        user_data = new_user.model_dump()
         user_data["id"] = str(new_user.id)
         return user_data
         
@@ -92,20 +92,20 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     
     return {"access_token": access_token, "token_type": "bearer"}
 
-# @router.get("/me", response_model=UserResponse)
-# async def get_my_profile(current_user: User = Depends(get_current_user)):
-#     """Check Profile - Returns the current logged-in user's details."""
-#     try:
-#         # Return as dict to ensure serialization succeeds
-#         user_data = current_user.dict()
-#         user_data["id"] = str(current_user.id)
-#         return user_data
-#     except Exception as e:
-#         print(f"Me error: {str(e)}")
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Failed to fetch profile: {str(e)}"
-#         )
+@router.get("/me", response_model=UserResponse)
+async def get_my_profile(current_user: User = Depends(get_current_user)):
+    """Check Profile - Returns the current logged-in user's details."""
+    try:
+        # Return as dict and ensure ID is stringified for Pydantic
+        user_data = current_user.model_dump()
+        user_data["id"] = str(current_user.id)
+        return user_data
+    except Exception as e:
+        print(f"Me error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch profile: {str(e)}"
+        )
 
 @router.put("/profile", response_model=UserResponse)
 async def update_profile(user_update: UserUpdate, current_user: User = Depends(get_current_user)):
@@ -120,6 +120,6 @@ async def update_profile(user_update: UserUpdate, current_user: User = Depends(g
     await current_user.save()
     
     # Return as dict to ensure serialization succeeds
-    user_data = current_user.dict()
+    user_data = current_user.model_dump()
     user_data["id"] = str(current_user.id)
     return user_data
