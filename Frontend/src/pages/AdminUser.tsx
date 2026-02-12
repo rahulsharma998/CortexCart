@@ -3,7 +3,7 @@ import { useAuthStore } from "@/store/authStore";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MoreHorizontal, Users, Shield, User as UserIcon, Activity } from "lucide-react";
+import { MoreHorizontal, Users, Shield, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -81,7 +81,7 @@ const AdminUser = () => {
               <CardDescription className="text-slate-500 mt-1 font-medium">Detailed breakdown of institutional access levels.</CardDescription>
             </div>
             <div className="flex -space-x-3">
-              {users.slice(0, 5).map((u, i) => (
+              {users.slice(0, 5).map((u) => (
                 <div key={u._id} className="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center text-[10px] font-black text-orange-500 shadow-xl">
                   {u.name?.charAt(0).toUpperCase()}
                 </div>
