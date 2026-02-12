@@ -36,7 +36,7 @@ CortexCart is a full-stack, production-ready e-commerce web application built us
 ## 🔹 Deployment
 
 * Backend: Render
-* Frontend: Local / Deployable (Vercel / Netlify)
+* Frontend: Netlify
 
 ---
 
@@ -45,7 +45,7 @@ CortexCart is a full-stack, production-ready e-commerce web application built us
 ## 🔐 Authentication & Authorization
 
 * User Registration
-* User Login (JWT Based)
+* User Login (JWT-Based)
 * Role-Based Access Control (Admin / User)
 * Protected Routes
 * Persistent Login (Zustand Persist)
