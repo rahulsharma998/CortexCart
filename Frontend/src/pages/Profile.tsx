@@ -43,19 +43,19 @@ const Profile = () => {
         {/* Profile Card */}
         <Card className="md:col-span-1 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 h-fit">
           <CardHeader className="text-center">
-            <div className="w-24 h-24 mx-auto bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-4xl font-bold text-primary-600 dark:text-primary-400 shadow-inner">
+            <div className="w-24 h-24 mx-auto bg-orange-50 dark:bg-orange-800/10 rounded-full flex items-center justify-center mb-4 text-4xl font-bold text-orange-600 dark:text-orange-400 shadow-inner border-2 border-orange-100 dark:border-orange-800/50">
               {user?.name?.charAt(0).toUpperCase() || <User className="w-10 h-10" />}
             </div>
             <CardTitle className="text-lg font-bold">{user?.name}</CardTitle>
-            <CardDescription className="capitalize">{user?.role || "User"}</CardDescription>
+            <CardDescription className="capitalize font-medium text-orange-500">{user?.role || "User"}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-              <Mail className="w-4 h-4" />
+            <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+              <Mail className="w-4 h-4 text-orange-400" />
               <span className="truncate">{user?.email}</span>
             </div>
-            <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-              <MapPin className="w-4 h-4" />
+            <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+              <MapPin className="w-4 h-4 text-orange-400" />
               <span className="truncate">{user?.address || "No address set"}</span>
             </div>
           </CardContent>
@@ -67,7 +67,7 @@ const Profile = () => {
             <CardTitle className="text-lg font-bold flex items-center justify-between">
               <span>Personal Information</span>
               {!isEditing && (
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>Edit</Button>
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="border-orange-200 text-orange-600 hover:bg-orange-50">Edit</Button>
               )}
             </CardTitle>
             <CardDescription>Update your contact details</CardDescription>
@@ -88,7 +88,7 @@ const Profile = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={!isEditing}
-                  className="pl-9"
+                  className="pl-9 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
             </div>
@@ -117,7 +117,7 @@ const Profile = () => {
                   onChange={(e) => setAddress(e.target.value)}
                   disabled={!isEditing}
                   placeholder="Enter your shipping address"
-                  className="pl-9"
+                  className="pl-9 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
             </div>
@@ -125,7 +125,7 @@ const Profile = () => {
             {isEditing && (
               <div className="flex gap-3 pt-4">
                 <Button
-                  className="bg-primary-600 hover:bg-primary-700 text-white flex-1"
+                  className="bg-orange-500 hover:bg-orange-600 text-white flex-1 shadow-md"
                   onClick={handleUpdate}
                   disabled={isLoading}
                 >
