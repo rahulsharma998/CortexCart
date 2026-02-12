@@ -2,10 +2,14 @@ import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useOrderStore } from "@/store/orderStore";
+import { useLocation } from "react-router-dom";
 import { Loader2, Package, Clock, CheckCircle, Truck, AlertCircle } from "lucide-react";
 
 const Orders = () => {
   const { orders, fetchOrders, isLoading, error } = useOrderStore();
+  const location = useLocation();
+  const checkoutSuccess = (location.state as any)?.checkoutSuccess;
+  const checkoutOrderId = (location.state as any)?.orderId as string | undefined;
 
   useEffect(() => {
     fetchOrders();
@@ -60,6 +64,15 @@ const Orders = () => {
         </p>
       </div>
 
+      {checkoutSuccess && (
+        <div className="py-4 px-5 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
+          <div className="font-semibold">Order placed successfully</div>
+          {checkoutOrderId && (
+            <div className="text-sm opacity-90">Order ID: {checkoutOrderId}</div>
+          )}
+        </div>
+      )}
+
       {orders.length === 0 ? (
         <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
           <Package className="w-12 h-12 mx-auto text-slate-400 mb-4" />
@@ -73,17 +86,21 @@ const Orders = () => {
       ) : (
         <div className="space-y-6">
           {orders.map((order) => (
+            (() => {
+              const orderId = order._id || "";
+              const createdAt = order.createdAt || new Date().toISOString();
+              return (
             <div
-              key={order._id}
+              key={orderId}
             >
               <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden hover:shadow-md transition-shadow">
                 <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between pb-4">
                   <div className="flex flex-col gap-1">
                     <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
-                      Order #{order._id.slice(-8).toUpperCase()}
+                      Order #{orderId.slice(-8).toUpperCase()}
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      Placed on {new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString()}
+                      Placed on {new Date(createdAt).toLocaleDateString()} at {new Date(createdAt).toLocaleTimeString()}
                     </CardDescription>
                   </div>
                   <Badge variant="secondary" className={`${getStatusColor(order.status)} border-0 px-3 py-1 flex items-center gap-2`}>
@@ -105,7 +122,7 @@ const Orders = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-slate-900 dark:text-white truncate">
-                            {item.product?.name || "Product Name"}
+                            {item.product?.name || item.name || "Product"}
                           </p>
                           <p className="text-sm text-slate-500 dark:text-slate-400">
                             Qty: {item.quantity} × ₹{item.price}
@@ -126,6 +143,8 @@ const Orders = () => {
                 </CardContent>
               </Card>
             </div>
+              );
+            })()
           ))}
         </div>
       )}

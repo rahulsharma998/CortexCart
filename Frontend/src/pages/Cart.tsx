@@ -13,6 +13,7 @@ const Cart = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const total = getTotalPrice();
 
@@ -23,8 +24,9 @@ const Cart = () => {
     }
 
     setIsProcessing(true);
+    setCheckoutError(null);
     try {
-      await createOrder({
+      const { orderId } = await createOrder({
         items: items.map(item => ({
           product: item.product._id,
           quantity: item.quantity,
@@ -34,9 +36,9 @@ const Cart = () => {
         shippingAddress: user.address || "Default Address", // In real app, ask for address
       });
       clearCart();
-      navigate("/orders");
-    } catch (error) {
-      console.error("Checkout failed:", error);
+      navigate("/orders", { state: { checkoutSuccess: true, orderId } });
+    } catch (error: any) {
+      setCheckoutError(error?.response?.data?.detail || "Checkout failed");
     } finally {
       setIsProcessing(false);
     }
@@ -52,6 +54,12 @@ const Cart = () => {
           {items.length} item(s) in your cart
         </p>
       </div>
+
+      {checkoutError && (
+        <div className="text-center py-4 text-red-500 font-medium">
+          {checkoutError}
+        </div>
+      )}
 
       {items.length === 0 ? (
         <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import List, Optional
+from beanie import PydanticObjectId
 from app.dependencies.auth import get_current_user, get_current_admin
 from app.models.user import User
 from app.models.cart import Cart
@@ -22,7 +23,12 @@ async def checkout(request: CheckoutRequest, current_user: User = Depends(get_cu
         if not product_id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing product id")
 
-        product = await Product.get(product_id)
+        try:
+            product_oid = PydanticObjectId(product_id)
+        except Exception:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid product id")
+
+        product = await Product.get(product_oid)
         if not product:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Product not found")
 
