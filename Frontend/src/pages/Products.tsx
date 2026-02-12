@@ -1,20 +1,24 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, ShoppingCart, Package, Search } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Package, Search, Check, X, Loader2, ImagePlus } from "lucide-react";
 import { useProductStore } from "@/store/productStore";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
+import type { Product } from "@/types";
 
 const Products = () => {
-  const { products, fetchProducts, isLoading } = useProductStore();
-  const { addItem } = useCartStore();
+  const { products, fetchProducts, addProduct, isLoading } = useProductStore();
+  const { items: cartItems, addItem, updateQuantity, removeItem } = useCartStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addingProductId, setAddingProductId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -29,12 +33,36 @@ const Products = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddToCart = (product: any) => {
+  const getCartItem = (productId: string) => {
+    return cartItems.find((item) => item.product._id === productId);
+  };
+
+  const handleAddToCart = (product: Product) => {
     if (!user) {
       navigate("/auth");
       return;
     }
+    setAddingProductId(product._id);
     addItem(product);
+    setTimeout(() => setAddingProductId(null), 600);
+  };
+
+  const handleIncrement = (product: Product) => {
+    const cartItem = getCartItem(product._id);
+    if (cartItem) {
+      updateQuantity(product._id, cartItem.quantity + 1);
+    }
+  };
+
+  const handleDecrement = (product: Product) => {
+    const cartItem = getCartItem(product._id);
+    if (cartItem) {
+      if (cartItem.quantity <= 1) {
+        removeItem(product._id);
+      } else {
+        updateQuantity(product._id, cartItem.quantity - 1);
+      }
+    }
   };
 
   return (
@@ -71,7 +99,10 @@ const Products = () => {
           </select>
 
           {user?.role === "Admin" && (
-            <Button className="h-11 px-6 bg-orange-600 hover:bg-orange-700 text-white rounded-xl shadow-lg shadow-orange-500/20 font-bold">
+            <Button
+              className="h-11 px-6 bg-orange-600 hover:bg-orange-700 text-white rounded-xl shadow-lg shadow-orange-500/20 font-bold"
+              onClick={() => setShowAddModal(true)}
+            >
               <Plus className="w-4 h-4 mr-2" /> Add Product
             </Button>
           )}
@@ -94,56 +125,282 @@ const Products = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredProducts.map((product) => (
-            <Card key={product._id} className="group border-none bg-white dark:bg-slate-900 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 flex flex-col h-full ring-1 ring-slate-100 dark:ring-slate-800">
-              <div className="relative aspect-square overflow-hidden bg-slate-50">
-                {product.images?.[0] ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Package className="w-12 h-12 text-slate-200" />
-                  </div>
-                )}
-                <div className="absolute top-3 left-3">
-                  <span className="px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-slate-900 shadow-sm border border-slate-100">
-                    {product.category}
-                  </span>
-                </div>
-              </div>
+          {filteredProducts.map((product) => {
+            const cartItem = getCartItem(product._id);
+            const isInCart = !!cartItem;
+            const isAdding = addingProductId === product._id;
 
-              <CardContent className="p-6 flex flex-col flex-1">
-                <div className="flex-1 space-y-2">
-                  <h3 className="font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-orange-600 transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                    {product.description}
-                  </p>
-                </div>
-
-                <div className="mt-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Price</p>
-                    <p className="text-xl font-black text-slate-900 dark:text-white tracking-tight">₹{product.price}</p>
+            return (
+              <Card key={product._id} className="group border-none bg-white dark:bg-slate-900 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 flex flex-col h-full ring-1 ring-slate-100 dark:ring-slate-800">
+                <div className="relative aspect-square overflow-hidden bg-slate-50">
+                  {product.images?.[0] ? (
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="w-12 h-12 text-slate-200" />
+                    </div>
+                  )}
+                  <div className="absolute top-3 left-3">
+                    <span className="px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-slate-900 shadow-sm border border-slate-100">
+                      {product.category}
+                    </span>
                   </div>
 
-                  <Button
-                    size="icon"
-                    className="w-12 h-12 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-orange-600 dark:hover:bg-orange-600 text-white shadow-lg transition-all transform active:scale-90"
-                    onClick={() => handleAddToCart(product)}
-                  >
-                    <Plus className="w-6 h-6" />
-                  </Button>
+                  {isInCart && (
+                    <div className="absolute top-3 right-3">
+                      <span className="flex items-center gap-1 px-2.5 py-1 bg-emerald-500 text-white rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg shadow-emerald-500/30">
+                        <Check className="w-3 h-3" />
+                        In Cart
+                      </span>
+                    </div>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                <CardContent className="p-6 flex flex-col flex-1">
+                  <div className="flex-1 space-y-2">
+                    <h3 className="font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-orange-600 transition-colors">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                      {product.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Price</p>
+                      <p className="text-xl font-black text-slate-900 dark:text-white tracking-tight">₹{product.price}</p>
+                    </div>
+
+                    {isInCart ? (
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="w-10 h-10 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:border-red-500/30 transition-all"
+                          onClick={() => handleDecrement(product)}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </Button>
+
+                        <span className="w-10 h-10 flex items-center justify-center text-sm font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 rounded-xl">
+                          {cartItem.quantity}
+                        </span>
+
+                        <Button
+                          size="icon"
+                          className="w-10 h-10 rounded-xl bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-500/20 transition-all"
+                          onClick={() => handleIncrement(product)}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        size="icon"
+                        className={`w-12 h-12 rounded-xl text-white shadow-lg transition-all transform active:scale-90 ${isAdding
+                          ? "bg-emerald-500 hover:bg-emerald-600 scale-110"
+                          : "bg-slate-900 dark:bg-slate-800 hover:bg-orange-600 dark:hover:bg-orange-600"
+                          }`}
+                        onClick={() => handleAddToCart(product)}
+                      >
+                        {isAdding ? (
+                          <Check className="w-6 h-6 animate-bounce" />
+                        ) : (
+                          <Plus className="w-6 h-6" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
+
+      {showAddModal && <AddProductModal onClose={() => setShowAddModal(false)} />}
+    </div>
+  );
+};
+
+interface AddProductModalProps {
+  onClose: () => void;
+}
+
+const AddProductModal = ({ onClose }: AddProductModalProps) => {
+  const { addProduct, fetchProducts } = useProductStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    stock: "",
+    images: "",
+  });
+
+  const handleChange = (key: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+    if (error) setError("");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.name || !formData.description || !formData.price || !formData.category) {
+      setError("Please fill all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await addProduct({
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        stock: formData.stock ? parseInt(formData.stock) : 0,
+        images: formData.images ? formData.images.split(",").map((s) => s.trim()).filter(Boolean) : [],
+      });
+      await fetchProducts();
+      onClose();
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || "Failed to add product");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xl animate-fade-in overflow-hidden">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-3 right-3 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center shrink-0">
+            <ImagePlus className="w-5 h-5 text-orange-500" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight leading-tight">Add New Product</h3>
+            <p className="text-slate-500 text-xs">Fill in the details to list a product.</p>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mb-3 p-2.5 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-semibold border border-red-200 dark:border-red-500/20">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-slate-600 dark:text-slate-400 font-bold text-[10px] uppercase tracking-wider">Product Name *</Label>
+            <Input
+              placeholder="e.g. Premium Wireless Headphones"
+              value={formData.name}
+              onChange={(e) => handleChange("name", e.target.value)}
+              className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+              required
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-slate-600 dark:text-slate-400 font-bold text-[10px] uppercase tracking-wider">Description *</Label>
+            <textarea
+              placeholder="Describe your product..."
+              value={formData.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              className="w-full h-[70px] px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 resize-none"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <Label className="text-slate-600 dark:text-slate-400 font-bold text-[10px] uppercase tracking-wider">Price (₹) *</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                value={formData.price}
+                onChange={(e) => handleChange("price", e.target.value)}
+                className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-slate-600 dark:text-slate-400 font-bold text-[10px] uppercase tracking-wider">Stock</Label>
+              <Input
+                type="number"
+                min="0"
+                placeholder="0"
+                value={formData.stock}
+                onChange={(e) => handleChange("stock", e.target.value)}
+                className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-slate-600 dark:text-slate-400 font-bold text-[10px] uppercase tracking-wider">Category *</Label>
+              <Input
+                placeholder="e.g. electronics"
+                value={formData.category}
+                onChange={(e) => handleChange("category", e.target.value)}
+                className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-slate-600 dark:text-slate-400 font-bold text-[10px] uppercase tracking-wider">Image URLs</Label>
+            <Input
+              placeholder="Comma-separated URLs"
+              value={formData.images}
+              onChange={(e) => handleChange("images", e.target.value)}
+              className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-1">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 h-10 rounded-lg border-slate-200 dark:border-slate-700 font-bold text-sm"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="flex-1 h-10 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-bold shadow-lg shadow-orange-500/20 text-sm"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Add Product"
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

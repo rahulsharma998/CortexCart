@@ -41,15 +41,14 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* ================= Sidebar ================= */}
+    <div className="min-h-screen flex bg-background overflow-hidden">
+
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 gradient-dark text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:static lg:inset-auto flex flex-col",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {/* Logo */}
         <div className="p-6 border-b border-sidebar-border">
           <Link to="/dashboard" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
@@ -61,7 +60,6 @@ const DashboardLayout = () => {
           </Link>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => (
             <Link
@@ -81,7 +79,6 @@ const DashboardLayout = () => {
           ))}
         </nav>
 
-        {/* Profile + Logout */}
         <div className="p-4 border-t border-sidebar-border">
           <div className="flex items-center gap-3 mb-3 px-3">
             <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-xs font-bold text-primary-foreground">
@@ -116,31 +113,33 @@ const DashboardLayout = () => {
         />
       )}
 
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Header */}
-        <header className="h-14 border-b border-border bg-card flex items-center px-4 lg:px-6 sticky top-0 z-30">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden mr-2"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
+      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto">
+        <header className="h-16 min-h-[4rem] border-b border-border bg-card/80 backdrop-blur-md flex items-center px-4 lg:px-6 sticky top-0 z-30 justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
 
-          <h2 className="font-display font-semibold text-foreground">
-            {navItems.find((i) => i.to === location.pathname)?.label ||
-              "Dashboard"}
-          </h2>
+            <h2 className="font-display font-semibold text-foreground text-lg truncate">
+              {navItems.find((i) => i.to === location.pathname)?.label ||
+                "Dashboard"}
+            </h2>
+          </div>
 
-          {isAdmin && (
-            <span className="ml-3 text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-              Admin
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {isAdmin && (
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
+                Admin
+              </span>
+            )}
+          </div>
         </header>
 
-        {/* Page Content */}
         <main className="flex-1 p-4 lg:p-6 overflow-auto">
           <Outlet />
         </main>
