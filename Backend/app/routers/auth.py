@@ -11,9 +11,6 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/signup")
 async def signup(user_in: UserCreate):
     try:
-        print(f"DEBUG: Starting signup for {user_in.email}")
-        
-        # Check if email exists
         user_by_email = await User.find_one({"email": user_in.email})
         if user_by_email:
             raise HTTPException(
@@ -21,7 +18,6 @@ async def signup(user_in: UserCreate):
                 detail="User with this email already exists"
             )
             
-        # Check if username exists
         user_by_username = await User.find_one({"username": user_in.username})
         if user_by_username:
             raise HTTPException(
@@ -31,7 +27,6 @@ async def signup(user_in: UserCreate):
         
         hashed_password = get_password_hash(user_in.password)
         
-        # Normalize role to match Literal["Admin", "User"] exactly
         valid_role = "User"
         if user_in.role:
             if user_in.role.lower() == "admin":
@@ -53,7 +48,6 @@ async def signup(user_in: UserCreate):
         
         await new_user.insert()
         
-        # Return as dict and ensure JSON safe serialization
         user_data = new_user.model_dump(mode='json')
         user_data["id"] = str(new_user.id)
         return user_data
@@ -61,8 +55,6 @@ async def signup(user_in: UserCreate):
     except HTTPException as e:
         raise e
     except Exception as e:
-        # Catch-all for debugging the 500 error
-        print(f"Signup error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Registration failed: {str(e)}"
@@ -70,11 +62,8 @@ async def signup(user_in: UserCreate):
 
 @router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    print(f"DEBUG: Login attempt for {form_data.username}")
-    # Try finding by username
     user = await User.find_one({"username": form_data.username})
     
-    # If not found, try finding by email
     if not user:
         user = await User.find_one({"email": form_data.username})
     
@@ -94,14 +83,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @router.get("/me")
 async def get_my_profile(current_user: User = Depends(get_current_user)):
-    """Check Profile - Returns the current logged-in user's details."""
     try:
-        # Return as dict and ensure ID is stringified for Pydantic
         user_data = current_user.model_dump(mode='json')
         user_data["id"] = str(current_user.id)
         return user_data
     except Exception as e:
-        print(f"Me error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch profile: {str(e)}"
@@ -109,7 +95,6 @@ async def get_my_profile(current_user: User = Depends(get_current_user)):
 
 @router.put("/profile")
 async def update_profile(user_update: UserUpdate, current_user: User = Depends(get_current_user)):
-    """Update Profile - Updates the current user's details."""
     if user_update.full_name is not None:
         current_user.full_name = user_update.full_name
     if user_update.address is not None:
@@ -119,7 +104,6 @@ async def update_profile(user_update: UserUpdate, current_user: User = Depends(g
     
     await current_user.save()
     
-    # Return as dict to ensure serialization succeeds
     user_data = current_user.model_dump(mode='json')
     user_data["id"] = str(current_user.id)
     return user_data

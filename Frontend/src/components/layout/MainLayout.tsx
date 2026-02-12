@@ -21,7 +21,7 @@ const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuthStore();
 
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "Admin";
 
   const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },

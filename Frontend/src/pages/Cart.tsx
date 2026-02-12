@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Minus, Plus, ShoppingBag, CreditCard, Loader2, Package } from "lucide-react";
+import { Trash2, Minus, Plus, ShoppingBag, CreditCard, Loader2, Package, CheckCircle2 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useOrderStore } from "@/store/orderStore";
 import { useAuthStore } from "@/store/authStore";
@@ -13,6 +13,7 @@ const Cart = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const total = getTotalPrice();
 
@@ -31,16 +32,38 @@ const Cart = () => {
           price: item.product.price
         })),
         totalAmount: total,
-        shippingAddress: user.address || "Default Address", // In real app, ask for address
+        shippingAddress: user.address || "Default Address",
       });
       clearCart();
-      navigate("/orders");
+      setIsSuccess(true);
+      setTimeout(() => {
+        setIsSuccess(false);
+        navigate("/orders");
+      }, 3000);
     } catch (error) {
       console.error("Checkout failed:", error);
     } finally {
       setIsProcessing(false);
     }
   };
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6">
+        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 animate-bounce shadow-lg shadow-green-500/20">
+          <CheckCircle2 className="w-12 h-12 text-green-600" />
+        </div>
+        <h2 className="text-3xl font-bold text-slate-900 mb-2">Order Placed Successfully!</h2>
+        <p className="text-slate-500 mb-8 max-w-md">
+          Thank you for your purchase. Your order is being processed and will be shipped soon.
+          Redirecting to your orders...
+        </p>
+        <Button onClick={() => navigate("/orders")} className="bg-green-600 hover:bg-green-700 text-white px-8 h-12 rounded-xl">
+          View My Orders
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -64,7 +87,7 @@ const Cart = () => {
           <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-md mx-auto">
             Looks like you haven't added anything to your cart yet. Explore our products and find something you love!
           </p>
-          <Button onClick={() => navigate("/products")} className="bg-primary-600 hover:bg-primary-700 text-white px-8">
+          <Button onClick={() => navigate("/products")} className="bg-orange-600 hover:bg-orange-700 text-white px-8 h-11 rounded-xl shadow-lg shadow-orange-500/20">
             Start Shopping
           </Button>
         </div>
@@ -75,14 +98,14 @@ const Cart = () => {
               <div
                 key={item.product._id}
               >
-                <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+                <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden rounded-xl group transition-all hover:shadow-md">
                   <CardContent className="p-0 flex flex-col sm:flex-row">
-                    <div className="w-full sm:w-32 h-32 bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                    <div className="w-full sm:w-32 h-32 bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 overflow-hidden">
                       {item.product.images?.[0] ? (
                         <img
                           src={item.product.images[0]}
                           alt={item.product.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                       ) : (
                         <Package className="w-10 h-10 text-slate-300 dark:text-slate-600" />
@@ -98,7 +121,7 @@ const Cart = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="text-slate-400 hover:text-red-500 -mt-1 -mr-2 sm:hidden"
+                            className="text-slate-400 hover:text-red-500 -mt-1 -mr-2 sm:hidden rounded-full"
                             onClick={() => removeItem(item.product._id)}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -107,17 +130,17 @@ const Cart = () => {
                         <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-1 mb-2">
                           {item.product.description}
                         </p>
-                        <p className="font-medium text-primary-600 dark:text-primary-400">
+                        <p className="font-bold text-orange-600 dark:text-orange-400 text-lg">
                           ₹{item.product.price}
                         </p>
                       </div>
 
                       <div className="flex items-center justify-between sm:gap-6">
-                        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 shadow-inner">
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-7 w-7 rounded-md"
+                            className="h-8 w-8 rounded-lg hover:bg-white dark:hover:bg-slate-700"
                             onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
                           >
                             <Minus className="w-3 h-3" />
@@ -126,7 +149,7 @@ const Cart = () => {
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-7 w-7 rounded-md"
+                            className="h-8 w-8 rounded-lg hover:bg-white dark:hover:bg-slate-700"
                             onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
                           >
                             <Plus className="w-3 h-3" />
@@ -142,7 +165,7 @@ const Cart = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-slate-400 hover:text-red-500 hidden sm:inline-flex"
+                          className="text-slate-400 hover:text-red-500 hidden sm:inline-flex rounded-full hover:bg-red-50"
                           onClick={() => removeItem(item.product._id)}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -156,7 +179,7 @@ const Cart = () => {
           </div>
 
           <div>
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-24 shadow-lg">
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-24 shadow-xl rounded-2xl overflow-hidden">
               <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 pb-4">
                 <CardTitle className="text-lg font-bold">
                   Order Summary
@@ -164,27 +187,27 @@ const Cart = () => {
               </CardHeader>
               <CardContent className="space-y-4 pt-6">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 dark:text-slate-400">Subtotal</span>
-                  <span className="font-medium text-slate-900 dark:text-white">₹{total.toFixed(2)}</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Subtotal</span>
+                  <span className="font-bold text-slate-900 dark:text-white">₹{total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 dark:text-slate-400">Shipping</span>
-                  <span className="font-medium text-green-600 dark:text-green-400">Free</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Shipping</span>
+                  <span className="font-bold text-green-600 dark:text-green-400">Free</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 dark:text-slate-400">Tax</span>
-                  <span className="font-medium text-slate-900 dark:text-white">₹0.00</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Tax</span>
+                  <span className="font-bold text-slate-900 dark:text-white">₹0.00</span>
                 </div>
 
                 <div className="border-t border-slate-100 dark:border-slate-800 pt-4 flex justify-between items-end">
                   <span className="font-bold text-slate-900 dark:text-white">Total</span>
-                  <span className="font-bold text-2xl text-primary-600 dark:text-primary-400">
+                  <span className="font-extrabold text-2xl text-orange-600 dark:text-orange-400">
                     ₹{total.toFixed(2)}
                   </span>
                 </div>
 
                 <Button
-                  className="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold py-6 mt-4 shadow-lg shadow-primary-500/20"
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-6 mt-4 shadow-lg shadow-orange-500/20 rounded-xl"
                   onClick={handleCheckout}
                   disabled={isProcessing}
                 >
@@ -196,7 +219,7 @@ const Cart = () => {
                   {isProcessing ? "Processing..." : "Proceed to Checkout"}
                 </Button>
 
-                <p className="text-xs text-center text-slate-400 mt-4">
+                <p className="text-[10px] text-center text-slate-400 mt-4 font-medium uppercase tracking-widest">
                   Secure checkout powered by Stripe
                 </p>
               </CardContent>

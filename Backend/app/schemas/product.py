@@ -23,7 +23,7 @@ class ProductUpdate(BaseModel):
 
 class ProductResponse(ProductBase):
     id: Optional[str] = None
-    _id: Optional[str] = None  # Frontend compatibility
+    _id: Optional[str] = None 
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     

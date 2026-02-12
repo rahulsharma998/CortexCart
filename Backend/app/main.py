@@ -7,14 +7,12 @@ from app.routers import auth, products, admin, cart, order
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize Database on Startup
     try:
         await init_db()
         print("Database initialized successfully")
     except Exception as e:
         print(f"Database initialization failed: {e}")
     yield
-    # Shutdown logic if needed
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -22,7 +20,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Middleware - Relaxed for development/simplicity
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -32,7 +29,6 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# Include Routers
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(products.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)

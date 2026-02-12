@@ -27,7 +27,6 @@ async def get_products():
         safe_products = []
         for p in products:
             try:
-                # Use model_dump(mode='json') to ensure all types are serializable
                 d = p.model_dump(mode='json')
                 d["id"] = str(p.id)
                 d["_id"] = str(p.id)
@@ -38,7 +37,6 @@ async def get_products():
         return safe_products
     except Exception as e:
         print(f"CRITICAL: get_products failed: {str(e)}")
-        # If it's a database connection error or similar, return it clearly
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch products: {str(e)}"
@@ -76,7 +74,6 @@ async def update_product(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    # Check if user is admin or creator
     if current_user.role != "Admin" and str(product.created_by) != str(current_user.id):
         raise HTTPException(status_code=403, detail="Not authorized")
     
@@ -97,8 +94,7 @@ async def delete_product(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
         
-    # Check if user is admin or creator
-    if current_user.role != "admin" and str(product.created_by) != str(current_user.id):
+    if current_user.role != "Admin" and str(product.created_by) != str(current_user.id):
         raise HTTPException(status_code=403, detail="Not authorized")
         
     await product.delete()
