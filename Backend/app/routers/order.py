@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
+from typing import List, Optional
 from app.dependencies.auth import get_current_user, get_current_admin
 from app.models.user import User
 from app.models.cart import Cart
 from app.models.product import Product
 from app.models.order import Order, OrderItem
-from typing import List
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -64,7 +65,7 @@ async def checkout(request: CheckoutRequest, current_user: User = Depends(get_cu
         await db_cart.save()
 
     # Return as safe dict
-    order_data = order.dict()
+    order_data = order.model_dump()
     order_data["id"] = str(order.id)
     return {
         "message": "Order placed successfully", 
@@ -79,7 +80,7 @@ async def get_my_orders(current_user: User = Depends(get_current_user)):
     # Return as safe dict list
     safe_orders = []
     for o in orders:
-        d = o.dict()
+        d = o.model_dump()
         d["id"] = str(o.id)
         d["user_id"] = str(o.user_id)
         for item in d["items"]:

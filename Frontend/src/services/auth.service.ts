@@ -23,13 +23,11 @@ export const authService = {
     const token = response.data.access_token;
     localStorage.setItem('token', token);
 
-    // Bypass /me call for now as requested
-    // const userResp = await api.get<any>('/auth/me');
-
+    const userResp = await api.get<any>('/auth/me');
     return {
       access_token: token,
       token_type: response.data.token_type,
-      user: { email: credentials.email, role: 'user' } as any // Temporary mock user
+      user: mapUser(userResp.data)
     };
   },
 
@@ -50,9 +48,8 @@ export const authService = {
   },
 
   async getCurrentUser(): Promise<User> {
-    // const response = await api.get<any>('/auth/me');
-    // return mapUser(response.data);
-    return {} as any;
+    const response = await api.get<any>('/auth/me');
+    return mapUser(response.data);
   },
 
   async updateProfile(data: Partial<User>): Promise<User> {

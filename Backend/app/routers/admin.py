@@ -4,6 +4,7 @@ from app.models.user import User
 from app.models.product import Product
 from app.models.order import Order
 from app.schemas.user import UserResponse
+from app.services.auth_service import get_password_hash
 from typing import List
 
 router = APIRouter(prefix="/admin", tags=["admin"])

@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     MONGO_URI: str = "mongodb+srv://rahulsharma243998_db_user:o6FyReLbv1KaFe0q@cluster0.544eqn5.mongodb.net/?appName=Cluster0"
-    DB_NAME: str = "CortexCart"
+    DB_NAME: str = "cortexcart"
     
     SECRET_KEY: str = "secretkey"
     ALGORITHM: str = "HS256"
