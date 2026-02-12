@@ -8,7 +8,7 @@ from app.core.config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/signup", response_model=UserResponse)
+@router.post("/signup")
 async def signup(user_in: UserCreate):
     try:
         print(f"DEBUG: Starting signup for {user_in.email}")
@@ -53,8 +53,8 @@ async def signup(user_in: UserCreate):
         
         await new_user.insert()
         
-        # Return as dict to ensure serialization succeeds
-        user_data = new_user.model_dump()
+        # Return as dict and ensure JSON safe serialization
+        user_data = new_user.model_dump(mode='json')
         user_data["id"] = str(new_user.id)
         return user_data
         
@@ -92,12 +92,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me")
 async def get_my_profile(current_user: User = Depends(get_current_user)):
     """Check Profile - Returns the current logged-in user's details."""
     try:
         # Return as dict and ensure ID is stringified for Pydantic
-        user_data = current_user.model_dump()
+        user_data = current_user.model_dump(mode='json')
         user_data["id"] = str(current_user.id)
         return user_data
     except Exception as e:
@@ -107,7 +107,7 @@ async def get_my_profile(current_user: User = Depends(get_current_user)):
             detail=f"Failed to fetch profile: {str(e)}"
         )
 
-@router.put("/profile", response_model=UserResponse)
+@router.put("/profile")
 async def update_profile(user_update: UserUpdate, current_user: User = Depends(get_current_user)):
     """Update Profile - Updates the current user's details."""
     if user_update.full_name is not None:
@@ -120,6 +120,6 @@ async def update_profile(user_update: UserUpdate, current_user: User = Depends(g
     await current_user.save()
     
     # Return as dict to ensure serialization succeeds
-    user_data = current_user.model_dump()
+    user_data = current_user.model_dump(mode='json')
     user_data["id"] = str(current_user.id)
     return user_data

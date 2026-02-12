@@ -1,5 +1,6 @@
 from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
+from datetime import datetime
 
 class ProductBase(BaseModel):
     name: str
@@ -22,6 +23,9 @@ class ProductUpdate(BaseModel):
 
 class ProductResponse(ProductBase):
     id: Optional[str] = None
+    _id: Optional[str] = None  # Frontend compatibility
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     
     model_config = ConfigDict(
         from_attributes=True,

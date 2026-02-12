@@ -9,10 +9,16 @@ from typing import List
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-@router.get("/users", response_model=List[UserResponse])
+@router.get("/users")
 async def get_all_users(admin: User = Depends(get_current_admin)):
     """Admin endpoint to list all users."""
-    return await User.find_all().to_list()
+    users = await User.find_all().to_list()
+    safe_users = []
+    for u in users:
+        d = u.model_dump(mode='json')
+        d["id"] = str(u.id)
+        safe_users.append(d)
+    return safe_users
 
 @router.patch("/users/{user_id}/toggle-status")
 async def toggle_user_status(user_id: str, admin: User = Depends(get_current_admin)):
