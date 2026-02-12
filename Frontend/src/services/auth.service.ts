@@ -1,11 +1,24 @@
 import api from './api';
 import type { LoginCredentials, RegisterData, AuthResponse, User } from '../types';
 
-const mapUser = (data: any): User => ({
+interface UserData {
+  full_name?: string;
+  name?: string;
+  email?: string;
+  id?: string;
+  _id?: string;
+  role?: string;
+  isActive?: boolean;
+  [key: string]: string | boolean | undefined;
+}
+
+const mapUser = (data: UserData): User => ({
   ...data,
-  name: data.full_name || data.name,
-  _id: data.id || data._id,
-  role: data.role || 'user',
+  name: data.full_name || data.name || '',
+  email: data.email || '',
+  _id: data.id || data._id || '',
+  role: (data.role || 'User') as 'User' | 'Admin',
+  isActive: data.isActive ?? true,
 });
 
 export const authService = {
@@ -14,21 +27,30 @@ export const authService = {
     formData.append('username', credentials.email);
     formData.append('password', credentials.password);
 
-    const response = await api.post<any>('/auth/login', formData, {
+    const response = await api.post<AuthResponse>('/auth/login', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
 
     const token = response.data.access_token;
-    localStorage.setItem('token', token);
 
-    const userResp = await api.get<any>('/auth/me');
-    return {
-      access_token: token,
-      token_type: response.data.token_type,
-      user: mapUser(userResp.data)
-    };
+    try {
+      const userResp = await api.get<UserData>('/auth/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return {
+        access_token: token,
+        token_type: response.data.token_type,
+        user: mapUser(userResp.data)
+      };
+    } catch {
+      return {
+        access_token: token,
+        token_type: response.data.token_type,
+        user: mapUser((response.data.user as UserData) || (response.data as unknown as UserData))
+      };
+    }
   },
 
   async register(data: RegisterData): Promise<AuthResponse> {
@@ -42,23 +64,23 @@ export const authService = {
       dob: data.dob ? new Date(data.dob).toISOString() : undefined,
       role: data.role,
     };
-    await api.post<any>('/auth/signup', payload);
+    await api.post<AuthResponse>('/auth/signup', payload);
 
     return authService.login({ email: data.email, password: data.password });
   },
 
   async getCurrentUser(): Promise<User> {
-    const response = await api.get<any>('/auth/me');
+    const response = await api.get<UserData>('/auth/me');
     return mapUser(response.data);
   },
 
   async updateProfile(data: Partial<User>): Promise<User> {
-    const payload: any = {};
+    const payload: Partial<UserData> = {};
     if (data.name) payload.full_name = data.name;
     if (data.address) payload.address = data.address;
     if (data.phone) payload.contact_number = data.phone;
 
-    const response = await api.put<any>('/auth/profile', payload);
+    const response = await api.put<UserData>('/auth/profile', payload);
     return mapUser(response.data);
   },
 
@@ -67,7 +89,7 @@ export const authService = {
   },
 
   async getUsers(): Promise<User[]> {
-    const response = await api.get<any[]>('/admin/users');
+    const response = await api.get<UserData[]>('/admin/users');
     return response.data.map(mapUser);
   },
 };

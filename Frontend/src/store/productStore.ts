@@ -22,9 +22,11 @@ export const useProductStore = create<ProductState>((set) => ({
 
     try {
       const response = await api.get("/products");
-      set({ products: response.data, isLoading: false });
+      const products = Array.isArray(response.data) ? response.data : [];
+      set({ products, isLoading: false });
     } catch (error: any) {
       set({
+        products: [],
         error: error.response?.data?.detail || "Failed to fetch products",
         isLoading: false,
       });

@@ -9,15 +9,15 @@ import { cn } from "@/lib/utils";
 
 const Dashboard = () => {
   const { user } = useAuthStore();
-  const { products, fetchProducts } = useProductStore();
-  const { orders, fetchOrders } = useOrderStore();
+  const { products = [], fetchProducts } = useProductStore();
+  const { orders = [], fetchOrders } = useOrderStore();
 
   useEffect(() => {
     fetchProducts();
     fetchOrders();
   }, [fetchProducts, fetchOrders]);
 
-  const totalRevenue = orders.reduce((acc, order) => acc + order.totalAmount, 0);
+  const totalRevenue = (orders || []).reduce((acc, order) => acc + (order.totalAmount || 0), 0);
 
   const stats = [
     {
@@ -30,7 +30,7 @@ const Dashboard = () => {
     },
     {
       title: "Transaction Volume",
-      value: orders.length.toString(),
+      value: (orders || []).length.toString(),
       icon: ShoppingBag,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
@@ -38,7 +38,7 @@ const Dashboard = () => {
     },
     {
       title: "Inventory Assets",
-      value: products.length.toString(),
+      value: (products || []).length.toString(),
       icon: Package,
       color: "text-orange-500",
       bg: "bg-orange-500/10",
@@ -113,8 +113,8 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-4">
-              {orders.length > 0 ? (
-                orders.slice(0, 5).map((order) => (
+              {(orders || []).length > 0 ? (
+                (orders || []).slice(0, 5).map((order) => (
                   <div key={order._id} className="group flex items-center justify-between p-4 rounded-2xl bg-slate-800/30 border border-slate-800/50 hover:bg-slate-800/60 transition-all">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-center text-orange-500 shadow-inner group-hover:rotate-6 transition-transform">
