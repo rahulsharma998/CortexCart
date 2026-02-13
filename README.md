@@ -9,6 +9,7 @@ CortexCart is a full-stack, production-ready e-commerce web application built us
 * **Frontend:** [https://loquacious-pudding-a34b73.netlify.app/](https://loquacious-pudding-a34b73.netlify.app/)
 * **Backend API:** [https://cortexcart.onrender.com/](https://cortexcart.onrender.com/)
 * **API Base URL:** [https://cortexcart.onrender.com/api/v1](https://cortexcart.onrender.com/api/v1)
+* **Swagger Documentation URL:** [https://cortexcart.onrender.com/docs](https://cortexcart.onrender.com/docs)
 
 ---
 
