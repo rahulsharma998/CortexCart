@@ -1,7 +1,11 @@
 import pymongo
+import os
+from dotenv import load_dotenv
 
-MONGO_URI = "mongodb+srv://rahulsharma243998_db_user:o6FyReLbv1KaFe0q@cluster0.544eqn5.mongodb.net/?appName=Cluster0"
-DB_NAME = "cortexcart"
+load_dotenv()
+
+MONGO_URI = os.environ["MONGO_URI"]
+DB_NAME = os.environ.get("DB_NAME", "cortexcart")
 
 def check():
     client = pymongo.MongoClient(MONGO_URI)
