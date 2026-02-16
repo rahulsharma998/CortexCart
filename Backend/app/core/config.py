@@ -5,11 +5,9 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "CortexCart"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
-    
-    MONGO_URI: str = "mongodb+srv://rahulsharma243998_db_user:o6FyReLbv1KaFe0q@cluster0.544eqn5.mongodb.net/?appName=Cluster0"
+    MONGO_URI: str
     DB_NAME: str = "cortexcart"
-    
-    SECRET_KEY: str = "secretkey"
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
