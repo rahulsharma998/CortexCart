@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import type { Product } from "@/types";
 
 const Products = () => {
-  const { products, fetchProducts, addProduct, isLoading } = useProductStore();
+  const { products, fetchProducts, isLoading } = useProductStore();
   const { items: cartItems, addItem, updateQuantity, removeItem } = useCartStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
