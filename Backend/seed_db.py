@@ -66,7 +66,7 @@ async def seed():
         "name": "Legends Naga Chain Bracelet",
         "price": 695,
         "description": "From our Legends Collection, inspired by the mythical water dragon that protects the ocean's pearl.",
-        "category": "jewelery",
+        "category": "Jewelry",
         "images": ["https://fakestoreapi.com/img/71pWzhdJNwL._AC_UL640_QL65_ML3_t.png"],
         "stock": 15
       },
@@ -74,7 +74,7 @@ async def seed():
         "name": "Solid Gold Petite Micropave",
         "price": 168,
         "description": "Satisfaction Guaranteed. Return or exchange any order within 30 days.",
-        "category": "jewelery",
+        "category": "Jewelry",
         "images": ["https://fakestoreapi.com/img/61sbMiUnoGL._AC_UL640_QL65_ML3_t.png"],
         "stock": 25
       },
@@ -82,7 +82,7 @@ async def seed():
         "name": "White Gold Plated Princess",
         "price": 9.99,
         "description": "Classic Created Wedding Engagement Solitaire Diamond Promise Ring for Her.",
-        "category": "jewelery",
+        "category": "Jewelry",
         "images": ["https://fakestoreapi.com/img/71YAIFU48IL._AC_UL640_QL65_ML3_t.png"],
         "stock": 80
       },
@@ -90,7 +90,7 @@ async def seed():
         "name": "Rose Gold Plated Earrings",
         "price": 10.99,
         "description": "Rose Gold Plated Double Flared Tunnel Plug Earrings. Made of 316L Stainless Steel.",
-        "category": "jewelery",
+        "category": "Jewelry",
         "images": ["https://fakestoreapi.com/img/51UDEzMJVpL._AC_UL640_QL65_ML3_t.png"],
         "stock": 90
       },

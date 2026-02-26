@@ -8,8 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 
+import Navbar from "@/components/layout/Navbar";
+
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const { login, register, isLoading, error, clearError, isAuthenticated, token, hasHydrated } = useAuthStore();
 
@@ -24,7 +26,7 @@ const Auth = () => {
 
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotSent, setForgotSent] = useState(false);  
+  const [forgotSent, setForgotSent] = useState(false);
   const [confirmError, setConfirmError] = useState("");
 
   useEffect(() => {
@@ -87,6 +89,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4 font-sans relative overflow-hidden">
+      <Navbar />
       <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-orange-900/40 rounded-full blur-[120px] animate-pulse"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-900/20 rounded-full blur-[120px] animate-pulse"></div>
@@ -105,12 +108,12 @@ const Auth = () => {
         <Card className="border border-slate-800 shadow-2xl bg-slate-900/50 backdrop-blur-3xl rounded-3xl overflow-hidden ring-1 ring-white/5">
           <CardHeader className="text-center pb-4 pt-10">
             <CardTitle className="text-3xl font-black text-white tracking-tight">
-              {isLogin ? "Welcome Back" : "Join the Future"}
+              {isLogin ? "Welcome Back" : "Create Account"}
             </CardTitle>
             <CardDescription className="text-slate-400 text-sm mt-2 font-medium">
               {isLogin
-                ? "Sign in to access your premium dashboard"
-                : "Create an account to start your journey"}
+                ? "Enter your details to log in"
+                : "Enter your details to sign up"}
             </CardDescription>
           </CardHeader>
 
@@ -231,7 +234,7 @@ const Auth = () => {
 
               {!isLogin && (
                 <div className="space-y-3">
-                  <Label className="text-slate-500 font-black text-[10px] uppercase tracking-widest ml-1">Account Purpose</Label>
+                  <Label className="text-slate-500 font-black text-[10px] uppercase tracking-widest ml-1">Select Role</Label>
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       type="button"
@@ -243,7 +246,7 @@ const Auth = () => {
                           : "bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600"
                       )}
                     >
-                      Shopper
+                      User
                     </button>
                     <button
                       type="button"
@@ -255,7 +258,7 @@ const Auth = () => {
                           : "bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600"
                       )}
                     >
-                      Merchant
+                      Admin
                     </button>
                   </div>
                 </div>
@@ -269,14 +272,14 @@ const Auth = () => {
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  isLogin ? "Authorize Access" : "Initialize Account"
+                  isLogin ? "Log In" : "Sign Up"
                 )}
               </Button>
             </form>
 
             <div className="mt-10 pt-8 border-t border-slate-800 text-center">
               <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">
-                {isLogin ? "New to the engine?" : "Already verified?"}
+                {isLogin ? "Don't have an account?" : "Already have an account?"}
               </p>
               <button
                 type="button"
@@ -284,7 +287,7 @@ const Auth = () => {
                 onClick={toggleMode}
                 disabled={isLoading}
               >
-                {isLogin ? "Build an Identity" : "Access Console"}
+                {isLogin ? "Sign Up" : "Log In"}
               </button>
             </div>
           </CardContent>
