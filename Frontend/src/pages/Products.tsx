@@ -24,6 +24,15 @@ const Products = () => {
     fetchProducts();
   }, [fetchProducts]);
 
+  // Helper to format category names
+  const formatCategory = (cat: string) => {
+    if (cat === "jewelery" || cat === "jewellery") return "Jewelry";
+    if (cat === "men's clothing") return "Men's Clothing";
+    if (cat === "women's clothing") return "Women's Clothing";
+    if (cat === "electronics") return "Electronics";
+    return cat.charAt(0).toUpperCase() + cat.slice(1);
+  };
+
   const categories = ["All", ...new Set(products.map((p) => p.category))];
 
   const filteredProducts = products.filter((product) => {
@@ -94,7 +103,7 @@ const Products = () => {
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
             {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+              <option key={cat} value={cat}>{cat === "All" ? "All Categories" : formatCategory(cat)}</option>
             ))}
           </select>
 
@@ -146,7 +155,7 @@ const Products = () => {
                   )}
                   <div className="absolute top-3 left-3">
                     <span className="px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-slate-900 shadow-sm border border-slate-100">
-                      {product.category}
+                      {formatCategory(product.category)}
                     </span>
                   </div>
 
